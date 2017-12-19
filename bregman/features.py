@@ -1,5 +1,15 @@
 # features.py - feature extraction and plotting
 # Bregman - music information retrieval toolkit
+import pylab as P
+import numpy as np
+from bregman import error
+import glob
+from bregman import plca
+from bregman.sound import *
+from bregman.audiodb import *
+import pdb
+from bregman.features_base import Features, feature_plot, feature_scale
+
 """
 Overview
 ========
@@ -84,15 +94,6 @@ __copyright__ = "Copyright (C) 2010  Michael Casey, Dartmouth College, All Right
 __license__ = "GPL Version 2.0 or Higher"
 __email__ = 'mcasey@dartmouth.edu'
 
-import pylab as P
-import numpy as np
-import error
-import glob
-import plca
-from sound import *
-from audiodb import *
-import pdb
-from features_base import Features, feature_plot, feature_scale
 
 # All features exposed as separate classes
 
@@ -416,7 +417,7 @@ class LinearFrequencyModulationPowerSpectrum(Features):
             fp = self.feature_params
             num_frames = int((window*fp['sample_rate'])/(1000.0*fp['nhop']))
             num_hop = int((hop*fp['sample_rate'])/(1000.0*fp['nhop']))
-            print num_frames, num_hop
+            print (num_frames, num_hop)
             if not num_frames and num_hop :
                 raise ValueError("num_frames and num_hop too small for FFT window / hop")
             else :

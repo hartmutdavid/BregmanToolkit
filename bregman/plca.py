@@ -280,7 +280,8 @@ class PLCA(object):
         params.H = H
     
         oldlogprob = -np.inf
-        for n in xrange(niter):
+        #DAV>>> for n in xrange(niter):
+        for n in range(0, niter):
             logprob, WZH = params.do_estep(W, Z, H)
             if n % printiter == 0:
                 logger.info('Iteration %d: logprob = %f', n, logprob)
@@ -360,7 +361,8 @@ class PLCA(object):
         logprob = self.compute_logprob(W, Z, H, WZH)
 
         VdivWZH = self.V / WZH
-        for z in xrange(self.rank):
+        #DAV>>> for z in xrange(self.rank):
+        for z in range(0, self.rank):
             tmp = np.outer(W[:,z] * Z[z], H[z,:]) * VdivWZH
             self.VRW[:,z] = tmp.sum(1)
             self.VRH[:,z] = tmp.sum(0)
@@ -415,7 +417,8 @@ class PLCA(object):
                                             niter=30, convergence_thresh=1e-7,
                                             axis=None):
         """Uses the approximation to the entropic prior from Matt Hoffman."""
-        for i in xrange(niter):
+        #DAV>>> for i in xrange(niter):
+        for i in range(0, niter):
             lastparam = param.copy()
             alpha = normalize(param**(nu / (nu - 1.0)), axis)
             param = normalize(evidence + beta * nu * alpha, axis)
@@ -481,7 +484,8 @@ class SIPLCA(PLCA):
         rank, T = H.shape
     
         WZH = np.zeros((F, T))
-        for tau in xrange(win):
+        #DAV>>> for tau in xrange(win):
+        for tau in range(0,win):
             WZH += np.dot(W[:,:,tau] * Z, shift(H, tau, 1, circular))
         return norm * WZH
 
@@ -495,7 +499,8 @@ class SIPLCA(PLCA):
                           title=['V (Iteration %d)' % curriter,
                                  'Reconstruction'] +
                           ['Basis %d reconstruction' % x
-                           for x in xrange(len(Z))],
+                           # for x in xrange(len(Z))],
+                           for x in range(0,len(Z))],
                           colorbar=False, grid=False, cmap=plt.cm.hot,
                           subplot=(nrows, 2), order='c', align='xy')
         plottools.plotall([None] + [Z], subplot=(nrows, 2), clf=False,
@@ -541,7 +546,8 @@ class SIPLCA(PLCA):
         VdivWZH = (self.V / (WZH + EPS))[:,:,np.newaxis]
         self.VRW[:] = 0
         self.VRH[:] = 0
-        for tau in xrange(self.win):
+        #DAV>>> for tau in xrange(self.win):
+        for tau in range(0, self.win):
             Ht = shift(H, tau, 1, self.circular)
             tmp = WZ[:,:,tau][:,np.newaxis,:] * Ht.T[np.newaxis,:,:] * VdivWZH
             self.VRW[:,:,tau] += tmp.sum(1)
@@ -649,7 +655,8 @@ class SIPLCA2(SIPLCA):
             circularF = circularT = circular
     
         recon = 0
-        for z in xrange(rank):
+        #DAV>>> for z in xrange(rank):
+        for z in range(0,rank):
             recon += sp.signal.fftconvolve(W[:,z,:] * Z[z], H[z,:,:])
     
         WZH = recon[:F,:T]
@@ -680,9 +687,11 @@ class SIPLCA2(SIPLCA):
         VdivWZH = (self.V / (WZH + EPS))[:,:,np.newaxis]
         self.VRW[:] = 0
         self.VRH[:] = 0
-        for r in xrange(self.winF):
+        #DAV>>> for r in xrange(self.winF):
+        for r in range(0, self.winF):
             WZshifted = shift(WZ, r, 0, self.circularF)
-            for tau in xrange(self.winT):
+            #DAV>>> for tau in xrange(self.winT):
+            for tau in range(0, self.winT):
                 Hshifted = shift(H[:,r,:], tau, 1, self.circularT)
                 tmp = ((WZshifted[:,:,tau][:,:,np.newaxis]
                         * Hshifted[np.newaxis,:,:]).transpose((0,2,1))
@@ -818,9 +827,9 @@ class DiscreteWSIPLCA2(FactoredSIPLCA2):
             self.taus.append([int(x) for x in currtaus])
             self.tauproportions.append(currtauproportions)
 
-        #print self.taus
-        #print self.tauproportions
-        #print [x.sum() for x in self.tauproportions]
+        #print (self.taus)
+        #print (self.tauproportions)
+        #print ([x.sum() for x in self.tauproportions])
 
     def reconstruct(self, W, Z, H, norm=1.0, circular=False):
         if W.ndim == 2:
@@ -836,7 +845,8 @@ class DiscreteWSIPLCA2(FactoredSIPLCA2):
             circularF = circularT = circular
 
         recon = np.zeros((F, T))
-        for r in xrange(self.winF):
+        #DAV>>> for r in xrange(self.winF):
+        for r in range(0, self.winF):
             Wshifted = shift(W, r, 0, circularF)
             for n, warp in enumerate(self.warpfactors):
                 for delay, tau in enumerate(self.taus[n]):
@@ -860,7 +870,8 @@ class DiscreteWSIPLCA2(FactoredSIPLCA2):
         VdivWZH = (self.V / (WZH + EPS))[:,:,np.newaxis]
         self.VRW[:] = 0
         self.VRH[:] = 0
-        for r in xrange(self.winF):
+        #DAV>>> for r in xrange(self.winF):
+        for r in range(0, self.winF):
             WZshifted = shift(WZ, r, 0, self.circularF)
             for n, warp in enumerate(self.warpfactors):
                 for delay, tau in enumerate(self.taus[n]):

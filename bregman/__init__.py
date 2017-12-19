@@ -1,4 +1,5 @@
 # Bregman - python toolkit for music information retrieval
+from __future__ import absolute_import
 
 __version__ = '1.0'
 __author__ = 'Michael A. Casey'
@@ -9,18 +10,16 @@ __email__ = 'mcasey@dartmouth.edu'
 __all__ = ["features", "segment", "audiodb", "testsignal", "psychoacoustics", "tuning", "sound", "plca", "distance", "classifier", "error", "beat", "suite"]
 
 # import the bregman modules
-import suite
-import features
-import segment
-import audiodb
-import testsignal
-import psychoacoustics
-import tuning
-import sound
-import plca
-import distance
-import classifier
-import error
-import beat
-
-
+from bregman import suite
+from bregman import features
+from bregman import segment
+from bregman import audiodb
+from bregman import testsignal
+from bregman import psychoacoustics
+from bregman import tuning
+from bregman import sound
+from bregman import plca
+from bregman import distance
+from bregman import classifier
+from bregman import error
+from bregman import beat

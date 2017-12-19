@@ -12,8 +12,8 @@ __email__ = 'mcasey@dartmouth.edu'
 
 
 from fractions import Fraction
-from psychoacoustics import dissonance_fun
-from testsignal import default_signal_params, harmonics
+from bregman.psychoacoustics import dissonance_fun
+from bregman.testsignal import default_signal_params, harmonics
 import pylab
 import pdb
 

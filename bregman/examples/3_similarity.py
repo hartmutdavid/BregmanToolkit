@@ -105,10 +105,10 @@ if __name__ == "__main__":
 
     # Cross similarity examples require a second audio file. 
     # Warp x to create a simulated alternate performance y
-    y = concatenate([resample(x[:len(x)/4], len(x)/4/2),
-                    resample(x[len(x)/4:len(x)/2], len(x)/4),
-                    resample(x[len(x)/2:3*len(x)/4], 2*len(x)/4),
-                     x[3*len(x)/4:]])
+    y = concatenate([resample(x[:len(x)//4], len(x)//4//2),
+                    resample(x[len(x)//4:len(x)//2], len(x)//4),
+                    resample(x[len(x)//2:3*len(x)//4], 2*len(x)//4),
+                     x[3*len(x)//4:]])
     
     ex_3a(x,y, 'Cross Similarity Matrix: CHROMA')
 

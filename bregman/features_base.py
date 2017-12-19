@@ -1,9 +1,9 @@
 import pylab as P
-import error
+from bregman import error
 import glob
-import plca
-from sound import *
-from audiodb import *
+from bregman import plca
+from bregman.sound import *
+from bregman.audiodb import *
 import pdb
 import scipy.signal as sig
 
@@ -237,7 +237,7 @@ class Features(object):
         # check plots        
         if feature =='stft':
             if not self._have_stft:
-                print "Error: must extract STFT first"
+                print ("Error: must extract STFT first")
             else:
                 feature_plot(P.absolute(self.STFT), normalize, dbscale, norm, title_string="STFT", interp=interp, nofig=nofig, **kwargs)
                 if labels:
@@ -247,7 +247,7 @@ class Features(object):
                     P.ylabel('Frequency (Hz)')
         elif feature == 'power':
             if not self._have_power:
-                print "Error: must extract POWER first"
+                print ("Error: must extract POWER first")
             else:
                 if not nofig: P.figure()
                 P.plot(feature_scale(self.POWER, normalize, dbscale)/20.0)
@@ -258,7 +258,7 @@ class Features(object):
                     P.ylabel("Power (dB)")
         elif feature == 'cqft':
             if not self._have_cqft:
-                print "Error: must extract CQFT first"
+                print ("Error: must extract CQFT first")
             else:
                 feature_plot(self.CQFT, normalize, dbscale, norm, title_string="CQFT",interp=interp,nofig=nofig,**kwargs)
                 if labels:
@@ -269,7 +269,7 @@ class Features(object):
                     P.ylabel('Frequency (Hz)')
         elif feature == 'mfcc':
             if not self._have_mfcc:
-                print "Error: must extract MFCC first"
+                print ("Error: must extract MFCC first")
             else:
                 fp = self._check_feature_params()
                 X = self.MFCC[self.lcoef:self.lcoef+self.ncoef,:]
@@ -280,7 +280,7 @@ class Features(object):
                     P.ylabel('Cepstral coeffient')
         elif feature == 'lcqft':
             if not self._have_lcqft:
-                print "Error: must extract LCQFT first"
+                print ("Error: must extract LCQFT first")
             else:
                 feature_plot(self.LCQFT, normalize, dbscale, norm, title_string="LCQFT",interp=interp,nofig=nofig,**kwargs)
                 if labels:
@@ -288,7 +288,7 @@ class Features(object):
                     P.yticks(P.arange(0,self._cqtN,self.nbpo), (self.lo*2**(P.arange(0,self._cqtN,self.nbpo)/self.nbpo)).round(1))
         elif feature == 'hcqft':
             if not self._have_hcqft:
-                print "Error: must extract HCQFT first"
+                print ("Error: must extract HCQFT first")
             else:
                 feature_plot(self.HCQFT, normalize, dbscale, norm, title_string="HCQFT",interp=interp,nofig=nofig,**kwargs)
                 if labels:
@@ -298,7 +298,7 @@ class Features(object):
                     P.ylabel('Frequency (Hz)')
         elif feature == 'chroma' or feature == 'hchroma':
             if not self._have_chroma:
-                print "Error: must extract CHROMA first"
+                print ("Error: must extract CHROMA first")
             else:
                 feature_plot(self.CHROMA, normalize, dbscale, norm, title_string="CHROMA",interp=interp,nofig=nofig,**kwargs)
                 if labels:
@@ -307,7 +307,7 @@ class Features(object):
                     P.xlabel('Time (secs)')
                     P.ylabel('Pitch Class')
         else:
-            print "Unrecognized feature, skipping plot: ", feature
+            print ("Unrecognized feature, skipping plot: ", feature)
 
     def _feature_plot_xticks(self, scale):
         x = P.plt.xticks()[0]
@@ -322,7 +322,7 @@ class Features(object):
         
     def _stft_specgram(self):
         if not self._have_x:
-            print "Error: You need to load a sound file first: use self.load_audio('filename.wav')\n"
+            print ("Error: You need to load a sound file first: use self.load_audio('filename.wav')\n")
             return False
         else:
             fp = self._check_feature_params()
@@ -330,7 +330,7 @@ class Features(object):
             self.STFT/=P.sqrt(self.nfft)
             self._have_stft=True
         if self.verbosity:
-            print "Extracted STFT: nfft=%d, hop=%d" %(self.nfft, self.nhop)
+            print ("Extracted STFT: nfft=%d, hop=%d" %(self.nfft, self.nhop))
         return True
 
     def _make_log_freq_map(self):
@@ -349,12 +349,13 @@ class Features(object):
         self._cqtN = float( P.floor(P.log(hi_edge/lo_edge)/P.log(f_ratio)) )
         self._dctN = self._cqtN
         self._outN = float(self.nfft/2+1)
-        if self._cqtN<1: print "warning: cqtN not positive definite"
-        mxnorm = P.empty(self._cqtN) # Normalization coefficients        
+        if self._cqtN < 1: 
+          print ("warning: cqtN not positive definite")
+        mxnorm = P.empty(int(self._cqtN)) # Normalization coefficients        
         fftfrqs = self._fftfrqs #P.array([i * self.sample_rate / float(self._fftN) for i in P.arange(self._outN)])
         logfrqs=P.array([lo_edge * P.exp(P.log(2.0)*i/bpo) for i in P.arange(self._cqtN)])
         logfbws=P.array([max(logfrqs[i] * (f_ratio - 1.0), self.sample_rate / float(self._fftN)) 
-                         for i in P.arange(self._cqtN)])
+                         for i in P.arange(int(self._cqtN))])
         #self._fftfrqs = fftfrqs
         self._logfrqs = logfrqs
         self._logfbws = logfbws
@@ -387,11 +388,11 @@ class Features(object):
         """
         DCT_OFFSET = self.lcoef
         nm = 1 / P.sqrt( self._cqtN / 2.0 )
-        self.DCT = P.empty((self._dctN, self._cqtN))
-        for i in P.arange(self._dctN):
-          for j in P.arange(self._cqtN):
+        self.DCT = P.empty((int(self._dctN), int(self._cqtN)))
+        for i in P.arange(int(self._dctN)):
+          for j in P.arange(int(self._cqtN)):
             self.DCT[ i, j ] = nm * P.cos( i * (2 * j + 1) * (P.pi / 2.0) / self._cqtN  )
-        for j in P.arange(self._cqtN):
+        for j in P.arange(int(self._cqtN)):
             self.DCT[ 0, j ] *= P.sqrt(2.0) / 2.0
 
     def _shift_insert(self,x, nex, hop):
@@ -402,11 +403,11 @@ class Features(object):
 
     def _stft(self):
         if not self._have_x:
-            print "Error: You need to load a sound file first: use self.load_audio('filename.wav')"
+            print ("Error: You need to load a sound file first: use self.load_audio('filename.wav')")
             return False
         fp = self._check_feature_params()
         num_frames = len(self.x)
-        self.STFT = P.zeros((self.nfft/2+1, num_frames), dtype='complex')
+        self.STFT = P.zeros((int(self.nfft /2+1), num_frames), dtype='complex')
         self.win = P.ones(self.wfft) if self.window=='rect' else P.np.sqrt(P.hanning(self.wfft))
         x = P.zeros(self.wfft)
         buf_frames = 0
@@ -420,7 +421,7 @@ class Features(object):
         self._fftfrqs = P.arange(0,self.nfft/2+1) * self.sample_rate/float(self.nfft)
         self._have_stft=True
         if self.verbosity:
-            print "Extracted STFT: nfft=%d, hop=%d" %(self.nfft, self.nhop)
+            print ("Extracted STFT: nfft=%d, hop=%d" %(self.nfft, self.nhop))
         self.inverse=self._istftm
         self.X = abs(self.STFT)
         if not self.magnitude:
@@ -462,7 +463,7 @@ class Features(object):
         H = self.nhop
         R = 1.0 if R is None else R
         dphi = (2*P.pi * H * P.arange(N/2+1)) / N
-        print "Phase Vocoder Resynthesis...", N, W, H, R
+        print ("Phase Vocoder Resynthesis...", N, W, H, R)
         A = P.angle(self.STFT) if Phi_hat is None else Phi_hat
         phs = A[:,0]
         self.X_hat = []
@@ -495,7 +496,7 @@ class Features(object):
         N, W, H = self.nfft, self.wfft, self.nhop
         R = 1.0 if R is None else R
         dphi = P.atleast_2d((2*P.pi * H * P.arange(N/2+1)) / N).T
-        print "Phase Vocoder Resynthesis...", N, W, H, R
+        print ("Phase Vocoder Resynthesis...", N, W, H, R)
         A = P.angle(self.STFT) if Phi_hat is None else Phi_hat
         U = P.diff(A,1) - dphi
         U = U - P.np.round(U/(2*P.pi))*2*P.pi
@@ -558,7 +559,7 @@ class Features(object):
         fp = self._check_feature_params()
         self.x_hat = self._overlap_add(P.real(P.irfft(self.X_hat.T)), usewin=usewin, resamp=resamp)
         if self.verbosity:
-            print "Extracted iSTFTM->self.x_hat"        
+            print ("Extracted iSTFTM->self.x_hat"        )
         return self.x_hat
 
     def _power(self):
@@ -568,7 +569,7 @@ class Features(object):
         self.POWER=(P.absolute(self.STFT)**2).sum(0)
         self._have_power=True
         if self.verbosity:
-            print "Extracted POWER"
+            print ("Extracted POWER")
         self.X=self.POWER
         return True
 
@@ -590,7 +591,7 @@ class Features(object):
             self._is_intensified=False
         self._have_cqft=True
         if self.verbosity:
-            print "Extracted CQFT: intensified=%d" %self._is_intensified
+            print ("Extracted CQFT: intensified=%d" %self._is_intensified)
         self.inverse=self.icqft
         self.X=self.CQFT
         return True
@@ -610,7 +611,7 @@ class Features(object):
         fp = self._check_feature_params()
         X_hat = P.dot(self.Q.T, V_hat)
         if self.verbosity:
-            print "iCQFT->X_hat"
+            print ("iCQFT->X_hat")
         self._istftm(X_hat, **kwargs)
         return self.x_hat
 
@@ -650,7 +651,7 @@ class Features(object):
         self.MFCC = P.dot(self.DCT, AA)
         self._have_mfcc=True
         if self.verbosity:
-            print "Extracted MFCC: lcoef=%d, ncoef=%d, intensified=%d" %(self.lcoef, self.ncoef, self.intensify)
+            print ("Extracted MFCC: lcoef=%d, ncoef=%d, intensified=%d" %(self.lcoef, self.ncoef, self.intensify))
         n=self.ncoef
         l=self.lcoef
         self.X=self.MFCC[l:l+n,:]
@@ -673,7 +674,7 @@ class Features(object):
         self.LCQFT = 10**P.dot( self.DCT[l:l+n,:].T, AA )
         self._have_lcqft=True
         if self.verbosity:
-            print "Extracted LCQFT: lcoef=%d, ncoef=%d, intensified=%d" %(self.lcoef, self.ncoef, self.intensify)
+            print ("Extracted LCQFT: lcoef=%d, ncoef=%d, intensified=%d" %(self.lcoef, self.ncoef, self.intensify))
         self.inverse=self.icqft
         self.X=self.LCQFT
         return True
@@ -694,7 +695,7 @@ class Features(object):
         self.HCQFT=10**P.dot( self.DCT[n+l:a,:].T, AA)
         self._have_hcqft=True
         if self.verbosity:
-            print "Extracted HCQFT: lcoef=%d, ncoef=%d, intensified=%d" %(self.lcoef, self.ncoef, self.intensify)
+            print ("Extracted HCQFT: lcoef=%d, ncoef=%d, intensified=%d" %(self.lcoef, self.ncoef, self.intensify))
         self.inverse=self.icqft
         self.X=self.HCQFT
         return True
@@ -717,11 +718,15 @@ class Features(object):
         # column-major ordering, like a spectrogram, is in FORTRAN order
         self.CHROMA=P.zeros((self.nbpo,b))
         for k in P.arange(complete_octaves):
-            self.CHROMA +=  self.CQFT[k*self.nbpo:(k+1)*self.nbpo,:]
+            print ('DAV>>>', k*self.nbpo,(k+1)*self.nbpo)
+            try:
+              self.CHROMA += self.CQFT[int(k*self.nbpo):int((k+1)*self.nbpo),:]
+            except ValueError:
+              break
         self.CHROMA = (self.CHROMA / complete_octaves)
         self._have_chroma=True
         if self.verbosity:
-            print "Extracted CHROMA: intensified=%d" %self.intensify
+            print ("Extracted CHROMA: intensified=%d" %self.intensify)
         self.inverse=self.ichroma
         self.X=self.CHROMA
         return True
@@ -745,7 +750,7 @@ class Features(object):
         self.CHROMA/= complete_octaves
         self._have_chroma=True
         if self.verbosity:
-            print "Extracted HCQFT CHROMA: lcoef=%d, ncoef=%d, intensified=%d" %(self.lcoef, self.ncoef, self.intensify)
+            print ("Extracted HCQFT CHROMA: lcoef=%d, ncoef=%d, intensified=%d" %(self.lcoef, self.ncoef, self.intensify))
         self.inverse=self.ichroma
         self.X=self.CHROMA
         return True
@@ -759,7 +764,7 @@ class Features(object):
         if not (self._have_hcqft or self._have_cqft):
             return None
         a,b = self.HCQFT.shape if self._have_hcqft else self.CQFT.shape
-        complete_octaves = a/self.nbpo # integer division, number of complete octaves
+        complete_octaves = a // self.nbpo # integer division, number of complete octaves
         if P.remainder(a,self.nbpo):
             complete_octaves += 1
         X = P.repeat(V, complete_octaves, 0)[:a,:] # truncate if necessary
@@ -788,7 +793,7 @@ class Features(object):
         dd = P.diff(P.r_[0,self.POWER])
         self.ONSETS = P.where((dd>0) & (P.roll(dd,-1)<0))[0]
         if self.verbosity:
-            print "Extracted ONSETS"
+            print ("Extracted ONSETS")
         self._have_onsets = True
         return True
 
@@ -806,7 +811,7 @@ class Features(object):
             chroma - self.nbpo-chroma-band pitch-class profile
         """
 
-        print """Valid feature extractors:
+        print ("""Valid feature extractors:
         stft - short-time Fourier transform
         cqft - constant-Q Fourier transform
         mfcc - Mel-frequency cepstral coefficients
@@ -814,7 +819,7 @@ class Features(object):
         hcqft - high-cepstra constant-Q Fourier transform
         chroma - self.nbpo-chroma-band pitch-class profile
         hchroma - high-quefrency self.nbpo-chroma-band pitch-class profile
-        """
+        """)
 
     # Component Extraction and Feature Separation Functions
     def separate(self, cls=plca.PLCA, n=5, play_flag=False, **kwargs):

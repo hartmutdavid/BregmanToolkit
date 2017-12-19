@@ -1,17 +1,16 @@
 #sound.py - audio file I/O and play functionality
 # Bregman - python toolkit for music information retrieval
+import os
+import numpy
+import subprocess
+from bregman import error
+import pdb
 
 __version__ = '1.0'
 __author__ = 'Michael A. Casey'
 __copyright__ = "Copyright (C) 2010  Michael Casey, Dartmouth College, All Rights Reserved"
 __license__ = "GPL Version 2.0 or Higher"
 __email__ = 'mcasey@dartmouth.edu'
-
-import os
-import numpy
-import subprocess
-import error
-import pdb
 
 # audio file handling
 try:
@@ -46,27 +45,27 @@ class WavOpen:
             self.index = 0
             self.sample_rate = self.sound.getframerate()
             if verbosity:
-                print 'sample_rate=%i' %self.sample_rate
+                print ('sample_rate=%i' %self.sample_rate)
             self.num_channels = self.sound.getnchannels()
             if verbosity:
-                print 'num_channels=%i' %self.num_channels
+                print ('num_channels=%i' %self.num_channels)
             self.sample_width = self.sound.getsampwidth()
             if verbosity:
-                print 'sample_width=%i' %self.sample_width
+                print ('sample_width=%i' %self.sample_width)
             self.num_frames = self.sound.getnframes()
             if verbosity:
-                print 'num_frames=%i, num_secs=%f' %(self.num_frames, self.num_frames/self.sample_rate)
+                print ('num_frames=%i, num_secs=%f' %(self.num_frames, self.num_frames/self.sample_rate))
             self.n = self.num_frames if n is None else n
             self.buffer_size = min(self.n, 16384)
             self.bytes_per_frame = self.sample_width * self.num_channels
             if verbosity:
-                print 'bytes_per_frame=%i' %self.bytes_per_frame
+                print ('bytes_per_frame=%i' %self.bytes_per_frame)
             self.bytes_per_second = self.sample_rate * self.bytes_per_frame
             if verbosity:
-                print 'bytes_per_second=%i' %self.bytes_per_second
+                print ('bytes_per_second=%i' %self.bytes_per_second)
             self.bytes_per_buffer = self.buffer_size * self.bytes_per_frame
             if verbosity:
-                print 'bytes_per_buffer=%i' %self.bytes_per_buffer
+                print ('bytes_per_buffer=%i' %self.bytes_per_buffer)
             self.sig = numpy.zeros((self.n,), dtype='float32')
         else:
             self.rewind()
@@ -94,7 +93,7 @@ class WavOpen:
                 self.sig[index] = signal[index*self.num_channels] / 32768.
 
     def __len__(self):        
-        return self.num_frames / self.n
+        return self.num_frames // self.n
 
     def __getitem__(self,k):
         while k < 0:
@@ -105,6 +104,9 @@ class WavOpen:
         self.index = k*self.n
         return self.next()
 
+    def __next__(self):
+        return self.next()
+ 
     def next(self):
         num_to_read = self.n if self.index < (self.num_frames - self.n + 1) else (self.num_frames - self.index)
         if num_to_read > 0:
@@ -143,14 +145,17 @@ def _wav_write(signal, wav_name, sample_rate):
         signal = numpy.atleast_2d(signal)
         w = wave.Wave_write(wav_name)
         if not w:
-            print "Error opening file named: ", wav_name
+            print ("Error opening file named: ", wav_name)
             raise error.BregmanError()
         w.setparams((signal.shape[0],2,sample_rate,signal.shape[1],'NONE','NONE'))
-        b_signal = '' # C-style binary string
+        #DAV>>> b_signal = '' # C-style binary string
+        b_signal = bytes('','ascii') # C-style binary string
         for i in range(signal.shape[1]):
-            b_signal += wave.struct.pack('h',int(32767*signal[0,i])) # transform to C-style binary string
+            #DAV>>> b_signal += wave.struct.pack('h',int(32767*signal[0,i])) # transform to C-style binary string
+            b_signal += bytes(wave.struct.pack('h',int(32767*signal[0,i]))) # transform to C-style binary string
             if signal.shape[0]>1:
-                b_signal += wave.struct.pack('h',int(32767*signal[1,i])) # transform to C-style binary string            
+                #DAV>>> b_signal += wave.struct.pack('h',int(32767*signal[1,i])) # transform to C-style binary string            
+                b_signal += bytes(wave.struct.pack('h',int(32767*signal[1,i]))) # transform to C-style binary string            
         w.writeframes(b_signal)
         w.close()
     return True
